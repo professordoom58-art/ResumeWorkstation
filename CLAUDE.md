@@ -104,6 +104,12 @@ For each row whose Status is `To Send` (or `Approved`):
    a few at random with `node src/browser/gmail_search_sent.js outbox/<date>/manifest_email.json`.
 6. **Report** what was sent, skipped and failed (with reasons), and what is in NEEDS_*.md. Then stop.
 
+**Progress pings:** if `profile/telegram.json` exists, a scheduled task (`src/telegram_status.py --once`, every
+10 min) sends the user the sweep progress, the done/left counts, the job types and the current send. Keep it
+accurate by keeping the Excel Status column and `outbox/sent_all.json` current, and write open items for the user
+as `- [ ] ...` lines in NEEDS_*.md so they are counted. The bot token lives only in the `TELEGRAM_BOT_TOKEN` user
+environment variable.
+
 ## 3. Resume specification (every resume)
 
 - A4, **exactly one page**, single column. Margins L/R 0.75 in, T/B 0.69 in. No tables, images, icons, headers or
@@ -170,6 +176,7 @@ more than email replies.
 | `scraper/run_all.py`, `stage_a…e_*.py`, `config.yaml` | Multi-source HR-email scraper (job boards, pharma sites, careers pages; MX-checked) |
 | `src/resume_lib.py`, `build_resume.py` | Resume DOCX + PDF via Word COM (reportlab does not work here), with a one-page check |
 | `src/excel_sync.py` | Excel ⇄ send manifests ⇄ `outbox/sent_all.json` |
+| `src/telegram_status.py` | Telegram progress pings every 10 min (Task Scheduler) |
 | `src/content.py`, `gen.py`, `names.py`, `batches/` | Local only (gitignored): the original per-job Python specs and last batch script, kept to rebuild old tailored files |
 | `src/browser/` | Playwright-over-CDP helpers: `start.js`, `attach.js`, `lib.js`, `gmail_*.js`, `wa_*.js`, `workday.js` |
 | `jobs/`, `tailored/`, `outbox/`, `resumes/`, `*.xlsx`, `application_log.md`, `NEEDS_*.md` | Personal data, **gitignored** |

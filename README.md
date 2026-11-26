@@ -83,6 +83,22 @@ node src\browser\wa_batch.js  outbox\<date>\manifest_whatsapp.json
 node src\browser\gmail_search_sent.js outbox\<date>\manifest_email.json  # in:sent to:<address> per recipient
 ```
 
+## Progress on your phone (Telegram)
+
+Every 10 minutes a bot messages you: sweep progress, leads done/left, the job types in today's list, the next
+roles up and what is being sent right now. After 60 quiet minutes it sends one "idle" note and goes silent until
+work resumes.
+
+1. Create a bot with [@BotFather](https://t.me/BotFather) (`/newbot`) and copy its token.
+2. Store the token as a user environment variable (never in a file):
+   `[Environment]::SetEnvironmentVariable("TELEGRAM_BOT_TOKEN", "<token>", "User")`
+3. Open your bot in Telegram and press **Start**, then:
+   ```powershell
+   .venv\Scripts\python.exe src	elegram_status.py --setup     # saves your chat id, sends a confirmation
+   .venv\Scripts\python.exe src	elegram_status.py --install   # Task Scheduler: every 10 minutes
+   ```
+   `--once` sends one now, `--print` previews without sending, and `--uninstall` stops the pings.
+
 ## The search profile (`profile/search.yaml`)
 
 | Key | Meaning |
@@ -110,6 +126,7 @@ Template: [`profile/search.example.yaml`](profile/search.example.yaml).
 | `scraper/sweep_pharma.py`, `build_sweep_tab.py` | Earlier pharma-only sweep feeding tabs of a tracker workbook |
 | `src/resume_lib.py`, `src/build_resume.py` | DOCX resume generator, PDF export through Word, fact-check and one-page check |
 | `src/excel_sync.py` | Daily Excel ⇄ send manifests ⇄ duplicate guard |
+| `src/telegram_status.py` | Telegram progress pings (Task Scheduler, every 10 min) |
 | `src/browser/` | Playwright over Chrome DevTools: `gmail_send.js`, `gmail_search_sent.js`, `gmail_read.js`, `gmail_list.js`, `wa_batch.js`, `wa_send.js`, `wa_doc.js`, `workday.js` |
 
 ## Known limits

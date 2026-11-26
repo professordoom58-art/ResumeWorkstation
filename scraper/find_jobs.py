@@ -115,6 +115,16 @@ def already_known():
     return contacted, urls
 
 
+PROGRESS_F = os.path.join(ROOT, "jobs", "progress.json")
+
+
+def progress(**kw):
+    """Live sweep state for src/telegram_status.py."""
+    os.makedirs(os.path.dirname(PROGRESS_F), exist_ok=True)
+    kw["updated"] = datetime.datetime.now().isoformat(timespec="seconds")
+    json.dump(kw, open(PROGRESS_F, "w", encoding="utf-8"), ensure_ascii=False)
+
+
 def sweep(cfg, target, need):
     from jobspy import scrape_jobs
     match = kw_regex(cfg["match_keywords"])
@@ -129,6 +139,8 @@ def sweep(cfg, target, need):
     black = load_blacklist()
     rows, seen = [], set()
     stats = dict(fetched=0, dup=0, blacklist=0, location=0, title=0, relevance=0, pay=0, experience=0, contact=0, contacted=0, scam=0)
+    total_q, done_q = len(cfg["search_terms"]) * len(cfg["locations"]), 0
+    started = datetime.datetime.now().isoformat(timespec="seconds")
     for term in cfg["search_terms"]:
         for loc in cfg["locations"]:
             if len(rows) >= target:
@@ -207,6 +219,9 @@ def sweep(cfg, target, need):
                 if len(rows) >= target:
                     break
             print(f"  {term} @ {loc}: {n} fetched | kept {kept} | total {len(rows)}/{target}", flush=True)
+            done_q += 1
+            progress(state="running", date=TODAY.isoformat(), started=started, queries_done=done_q, queries_total=total_q,
+                     term=term, location=loc, leads=len(rows), target=target)
             time.sleep(float(cfg.get("delay_seconds", 3)))
         if len(rows) >= target:
             break
@@ -295,6 +310,7 @@ def main():
     json.dump(rows, open(xlsx[:-5] + ".json", "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     print(f"\nDROPPED {stats}")
     print(f"WROTE {len(rows)} leads -> {xlsx}")
+    progress(state="finished", date=TODAY.isoformat(), leads=len(rows), target=target, excel=os.path.relpath(xlsx, ROOT))
     if len(rows) < target:
         print(f"SHORT by {target - len(rows)}: widen search_terms/locations, lower min_match, or use --need any")
 
