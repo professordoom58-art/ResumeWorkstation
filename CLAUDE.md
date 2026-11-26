@@ -3,8 +3,37 @@
 Instructions for any AI agent (Claude Code, Codex, Gemini CLI, …) working in this repo. Rewritten 26 Nov 2026;
 this file is the whole instruction set.
 
-**How the user starts a session:** they attach a resume and say *"read CLAUDE.md"* (or just "read CLAUDE.md" when a
-profile already exists). You then run the workflow in §2 from start to finish, stopping only where it says **ASK**.
+## 0. Quick start: the one-message kickoff
+
+A user starts by sending one message that contains some or all of:
+
+- **`start`** (or "read CLAUDE.md")
+- **their resume**: an attached PDF/DOCX, or pasted text
+- **a Telegram bot token** (optional): it looks like `123456789:AA…`, about 46 characters, from @BotFather
+
+When you get that message, do this without waiting to be asked, in order:
+
+1. **Setup.** If `.venv/Scripts/python.exe` is missing or the step 0 import check fails, run
+   `powershell -ExecutionPolicy Bypass -File setup.ps1` (safe to re-run). If it reports a missing prerequisite
+   (Python, Node, Chrome, Word), tell the user exactly what to install and stop.
+2. **Telegram (only if a token was given).** Run
+   `.venv/Scripts/python.exe src/telegram_status.py --connect --token <token>`. It checks the token, stores it in the
+   `TELEGRAM_BOT_TOKEN` *user environment variable*, and prints the bot's link. As soon as it prints
+   `ACTION: open https://t.me/<bot> and press Start`, tell the user to do exactly that. It waits 5 minutes, then
+   saves the chat ID, installs the 10-minute ping task and sends a first status.
+   - **Never** write the token to any file, commit or log, and never repeat it back in chat.
+   - If it says "does not look like a bot token", ask the user to copy it again from @BotFather.
+   - If no token was given, skip this step. Mention once that they can add pings later by sending a token.
+3. **Resume → profile**: step 1 below.
+4. **Profile → search**: step 2 below.
+5. **Chrome.** Check `curl -s http://127.0.0.1:9223/json/version`. If nothing answers, run
+   `node src/browser/start.js` and ask the user to sign in to Gmail and WhatsApp Web in that window. The sweep in
+   step 3 can run while they do this; only sending needs Chrome.
+6. **Sweep and ASK**: step 3. Then **apply**: step 4.
+
+Later sessions: "start" alone reuses the saved profile. A new resume replaces it after you show the user what changed.
+
+**Rule for any session:** run the workflow in §2 from start to finish, stopping only where it says **ASK**.
 
 ---
 
@@ -29,8 +58,8 @@ background check and kills the offer, so accuracy is never traded for volume.
 ## 2. The workflow
 
 ### Step 0: Check the setup
-`.venv/Scripts/python.exe -c "import jobspy, openpyxl, docx, pymupdf"` must succeed; if it fails, follow README
-"Setup". Read `profile/PROFILE.md` if it exists. If a resume was attached **and** it differs from the profile (or
+`.venv/Scripts/python.exe -c "import jobspy, openpyxl, docx, pymupdf"` must succeed; if it fails, run
+`powershell -ExecutionPolicy Bypass -File setup.ps1`. Read `profile/PROFILE.md` if it exists. If a resume was attached **and** it differs from the profile (or
 there is no profile), do step 1; otherwise skip to step 2.
 
 ### Step 1: Read the resume and record everything

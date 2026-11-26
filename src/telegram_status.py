@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
-"""Telegram progress pings: what is done, what is left, and what kind of jobs are being applied to.
+r"""Telegram progress pings: what is done, what is left, and what kind of jobs are being applied to.
 
-Setup (once):
+One-step setup (what the AI runs when the user pastes a bot token):
+  .venv\Scripts\python.exe src\telegram_status.py --connect --token <token>
+  -> checks the token, stores it in the TELEGRAM_BOT_TOKEN *user environment variable* (never a file), waits up to
+     5 minutes for the user to press Start in the bot, saves the chat id, installs the 10-minute task and sends a
+     first status. Without --token it uses the variable that is already set.
+
+Manual setup:
   1. Store the bot token as a Windows *user environment variable* (never in a file):
        [Environment]::SetEnvironmentVariable("TELEGRAM_BOT_TOKEN", "<token>", "User")
   2. Send any message (e.g. /start) to your bot in Telegram, then run:
@@ -195,6 +201,41 @@ def once(always=False):
     json.dump(st, open(STATE_F, "w", encoding="utf-8"))
 
 
+def store_token(t):
+    """Persist the token as a Windows user environment variable (registry), passed via env, never via a file."""
+    os.environ["TELEGRAM_BOT_TOKEN"] = t
+    if os.name == "nt":
+        env = dict(os.environ, TG_NEW_TOKEN=t)
+        subprocess.run(["powershell", "-NoProfile", "-Command",
+                        "[Environment]::SetEnvironmentVariable('TELEGRAM_BOT_TOKEN', $env:TG_NEW_TOKEN, 'User')"],
+                       check=True, env=env)
+
+
+def connect(tok=None, wait=300):
+    import time
+    if tok:
+        tok = tok.strip()
+        if not re.fullmatch(r"\d{6,12}:[A-Za-z0-9_-]{30,}", tok):
+            sys.exit("that does not look like a bot token (expected 123456789:AA...) - copy it again from @BotFather")
+        os.environ["TELEGRAM_BOT_TOKEN"] = tok
+    me = call("getMe")
+    if tok:
+        store_token(tok)
+    print(f"bot ok: @{me['username']} - " + ("token stored in the TELEGRAM_BOT_TOKEN user environment variable" if tok
+                                               else "using the TELEGRAM_BOT_TOKEN already set"))
+    print(f"ACTION: open https://t.me/{me['username']} and press Start (waiting up to {wait // 60} min)", flush=True)
+    end = time.time() + wait
+    while time.time() < end:
+        ups = call("getUpdates", timeout=20)
+        if any("message" in u for u in ups):
+            break
+    else:
+        sys.exit("no message received - press Start in the bot, then run --connect again")
+    setup()
+    install()
+    once(always=True)
+
+
 def setup():
     ups = call("getUpdates")
     chats = {u["message"]["chat"]["id"]: u["message"]["chat"] for u in ups if "message" in u}
@@ -228,11 +269,15 @@ def uninstall():
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     g = ap.add_mutually_exclusive_group(required=True)
-    for f in ("once", "setup", "install", "uninstall", "test", "print"):
+    for f in ("connect", "once", "setup", "install", "uninstall", "test", "print"):
         g.add_argument("--" + f, action="store_true")
     ap.add_argument("--always", action="store_true")
+    ap.add_argument("--token", help="bot token from @BotFather (with --connect)")
+    ap.add_argument("--wait", type=int, default=300, help="seconds --connect waits for you to press Start")
     a = ap.parse_args()
-    if a.setup:
+    if a.connect:
+        connect(a.token, a.wait)
+    elif a.setup:
         setup()
     elif a.install:
         install()

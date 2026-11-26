@@ -1,6 +1,32 @@
 # ResumeWorkstation
 
-An AI-driven job-application workstation. Attach your resume to an AI coding agent (Claude Code, Codex, Gemini CLI, …), say **"read CLAUDE.md"**, and it runs the whole loop. It reads your resume, finds today's jobs, builds an Excel, asks before applying, then sends a tailored resume to each employer. It never makes a claim your resume can't back.
+An AI-driven job-application workstation. Send an AI coding agent (Claude Code, Codex, Gemini CLI, …) one message, **`start` + your resume + your Telegram bot token**, and it runs the whole loop. It reads your resume, finds today's jobs, builds an Excel, asks before applying, then sends a tailored resume to each employer, pinging your phone every 10 minutes. It never makes a claim your resume can't back.
+
+## Quick start
+
+```powershell
+git clone https://github.com/professordoom58-art/ResumeWorkstation.git
+cd ResumeWorkstation
+powershell -ExecutionPolicy Bypass -File setup.ps1     # one-time: venv, packages, folders (safe to re-run)
+claude                                                 # or any AI coding agent, opened in this folder
+```
+
+Then send it **one message**:
+
+> **start**
+> *(attach your resume PDF/DOCX, or paste it)*
+> `123456789:AAH…your-telegram-bot-token…`  ← optional, for progress pings on your phone
+
+The agent:
+1. checks the setup;
+2. connects Telegram (you press **Start** in your bot when it asks);
+3. turns your resume into a private profile and a search plan;
+4. finds today's jobs and writes the Excel;
+5. asks **"Start applying?"**
+
+It opens an automation Chrome where you sign in to Gmail and WhatsApp Web once; sending goes through those accounts.
+
+**Getting a Telegram bot token (1 minute):** in Telegram, open [@BotFather](https://t.me/BotFather), send `/newbot`, pick a name and a username ending in `bot`, and copy the token it replies with. Every user creates their own bot. No token ships with this repo, and yours is stored only in a Windows user environment variable, never in a file.
 
 ## How it works
 
@@ -36,15 +62,14 @@ resume ──► profile/PROFILE.md ──► profile/search.yaml ──► scra
 
 ## Setup
 
+`setup.ps1` does all of this, and only adds what is missing:
+- checks for Python, Node, Chrome and Word;
+- creates `.venv` and installs `requirements.txt`;
+- runs `npm install` in `src\browser`;
+- creates the private folders and the empty duplicate guard `outbox\sent_all.json`.
+
 ```powershell
-git clone https://github.com/professordoom58-art/ResumeWorkstation.git
-cd ResumeWorkstation
-py -3.11 -m venv .venv
-.venv\Scripts\python.exe -m pip install -r requirements.txt
-cd src\browser; npm install; cd ..\..
-mkdir outbox, jobs, profile -Force
-if (-not (Test-Path outbox\sent_all.json)) { '{}' | Out-File -Encoding ascii outbox\sent_all.json }
-.venv\Scripts\python.exe -c "import jobspy, openpyxl, docx, pymupdf; print('ok')"
+powershell -ExecutionPolicy Bypass -File setup.ps1
 ```
 
 Start the automation Chrome. Sign in to Gmail and WhatsApp Web **once** in that window; the session is kept in a local profile.
@@ -56,7 +81,7 @@ curl.exe -s http://127.0.0.1:9223/json/version   # should print Chrome's version
 
 ## Usage
 
-**With an AI agent:** attach your resume and say **"read CLAUDE.md"**. On later days, just say "read CLAUDE.md"; the profile is reused.
+**With an AI agent:** send `start` + your resume (+ bot token the first time). On later days, `start` alone reuses the saved profile.
 
 **By hand:**
 
@@ -85,19 +110,37 @@ node src\browser\gmail_search_sent.js outbox\<date>\manifest_email.json  # in:se
 
 ## Progress on your phone (Telegram)
 
-Every 10 minutes a bot messages you: sweep progress, leads done/left, the job types in today's list, the next
-roles up and what is being sent right now. After 60 quiet minutes it sends one "idle" note and goes silent until
-work resumes.
+Every 10 minutes a bot messages you:
+- sweep progress;
+- leads done and left;
+- the job types in today's list;
+- the next roles up, and what is being sent right now.
 
-1. Create a bot with [@BotFather](https://t.me/BotFather) (`/newbot`) and copy its token.
-2. Store the token as a user environment variable (never in a file):
-   `[Environment]::SetEnvironmentVariable("TELEGRAM_BOT_TOKEN", "<token>", "User")`
-3. Open your bot in Telegram and press **Start**, then:
-   ```powershell
-   .venv\Scripts\python.exe src	elegram_status.py --setup     # saves your chat id, sends a confirmation
-   .venv\Scripts\python.exe src	elegram_status.py --install   # Task Scheduler: every 10 minutes
-   ```
-   `--once` sends one now, `--print` previews without sending, and `--uninstall` stops the pings.
+After 60 quiet minutes it sends one "idle" note and goes silent until work resumes.
+
+```
+📋 Job hunt — 26 Nov, 14:20
+🔎 Sweep running: query 34/160 (clinical research coordinator @ Gurugram) — 21/60 leads
+📊 Excel: 58 leads — ✅ 12 done · ⏳ 41 left · ⛔ 5 skipped
+🧪 Job types: Pharmacist 18, Clinical Research 11, PV 9, QA/QC 6
+📤 Sent today: 9 email · 3 WhatsApp
+▶️ Now: Clinical Research Coordinator @ … — SENT at 14:18
+```
+
+**With the AI:** include your bot token in the first message (see [Quick start](#quick-start)). Every user brings their own bot.
+
+**By hand:**
+
+```powershell
+.venv\Scripts\python.exe src\telegram_status.py --connect --token <your-token>
+#   checks the token, stores it as the TELEGRAM_BOT_TOKEN user environment variable (never a file),
+#   waits for you to press Start in your bot, installs the 10-minute Task Scheduler job, sends a first status
+.venv\Scripts\python.exe src\telegram_status.py --print          # preview without sending
+.venv\Scripts\python.exe src\telegram_status.py --once --always  # send one now
+.venv\Scripts\python.exe src\telegram_status.py --uninstall      # stop the pings
+```
+
+Pings need the PC on and awake. Errors from scheduled runs go to `jobs\telegram.log`.
 
 ## The search profile (`profile/search.yaml`)
 
@@ -126,7 +169,8 @@ Template: [`profile/search.example.yaml`](profile/search.example.yaml).
 | `scraper/sweep_pharma.py`, `build_sweep_tab.py` | Earlier pharma-only sweep feeding tabs of a tracker workbook |
 | `src/resume_lib.py`, `src/build_resume.py` | DOCX resume generator, PDF export through Word, fact-check and one-page check |
 | `src/excel_sync.py` | Daily Excel ⇄ send manifests ⇄ duplicate guard |
-| `src/telegram_status.py` | Telegram progress pings (Task Scheduler, every 10 min) |
+| `src/telegram_status.py` | Telegram progress pings: `--connect` setup, Task Scheduler every 10 min |
+| `setup.ps1` | One-time setup for a fresh clone (safe to re-run) |
 | `src/browser/` | Playwright over Chrome DevTools: `gmail_send.js`, `gmail_search_sent.js`, `gmail_read.js`, `gmail_list.js`, `wa_batch.js`, `wa_send.js`, `wa_doc.js`, `workday.js` |
 
 ## Known limits
@@ -147,7 +191,9 @@ Template: [`profile/search.example.yaml`](profile/search.example.yaml).
 | `FACT-CHECK FAILED` | The tailored spec changed a locked fact or used a number not in the profile. Fix the spec |
 | `OVERFLOW: must be exactly one page` | Cut words, then the least relevant bullet. Never shrink fonts or margins |
 | `Job_Leads_<today>.xlsx already exists` | Today's file is never overwritten; rename it to re-run |
-| `ModuleNotFoundError: docx` / `pymupdf` | Install into the venv: `.venv\Scripts\python.exe -m pip install -r requirements.txt` |
+| `ModuleNotFoundError: docx` / `pymupdf` | Re-run `setup.ps1` |
+| No Telegram pings | Press **Start** in your bot, then run `telegram_status.py --once --always`. Check `jobs\telegram.log` and `Get-ScheduledTaskInfo -TaskName "ResumeWorkstation Telegram Status"` |
+| `that does not look like a bot token` | Copy the full token again from @BotFather (format `123456789:AA…`) |
 
 ## Privacy
 
