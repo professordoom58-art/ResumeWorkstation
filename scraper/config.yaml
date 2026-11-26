@@ -1,0 +1,44 @@
+days_back: 7
+locations:
+  - "Noida, Uttar Pradesh"
+  - "Gurugram, Haryana"
+  - "Delhi"
+  - "India"
+search_terms:
+  - pharmacovigilance
+  - drug safety associate
+  - case processing ICSR
+  - clinical research coordinator
+  - clinical trial assistant
+  - clinical data management
+  - medical coding
+  - medical information associate
+  - regulatory affairs executive
+  - medical representative
+  - pharma business development executive
+jobspy_sites: ["indeed", "naukri", "google"]
+use_linkedin: true          # light use only, auto-disable on 429
+results_per_query: 50
+site_seeds:
+  - https://pharmabharat.com/
+  - https://pharmabharat.org/category/vacancies/
+  - https://pharmatutor.org/pharma-jobs
+  - https://www.hiremr.in/job-location/delhi-ncr/
+  - https://pharmabharat.com/category/pharmacovigilance-jobs/
+  - https://pharmabharat.com/category/clinical-research-jobs/
+  - https://pharmabharat.com/category/quality-control-jobs/
+  - https://www.pharmatutor.org/pharma-jobs/vacancies.html
+  - https://pharmajobspost.in/
+  - https://pharmastuff.org/
+  - https://www.jobavailables.com/
+target_companies:
+  [IQVIA, ICON, Parexel, Fortrea, Syneos Health, Labcorp, APCER Life Sciences,
+   Clarivate, TCS, Cognizant, Accenture, Wipro, Mankind Pharma, Sun Pharma,
+   Cipla, Dr Reddy's, Lupin, Glenmark, Alkem, Zydus, Intas, Biocon, Piramal,
+   Jubilant, Lambda Therapeutic, Veeda, Cliantha]
+scam_words:
+  ["registration fee", "security deposit", "processing fee", "pay rs",
+   "training fee", "refundable amount"]
+freemail: ["gmail.com", "yahoo.com", "yahoo.in", "outlook.com", "hotmail.com", "rediffmail.com"]
+min_hunter_confidence: 90
+request_delay_seconds: 3

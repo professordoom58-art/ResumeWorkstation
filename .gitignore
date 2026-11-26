@@ -1,0 +1,37 @@
+# ---- personal records (requested) ----
+application_log.md
+NEEDS_*.md
+tailored/
+resumes/
+
+# ---- applicant profile: private; only the *.example.* templates are tracked ----
+profile/*
+!profile/*.example.*
+
+# ---- job leads, outreach history, trackers (contain recruiters' contact details) ----
+jobs/
+outbox/
+*.xlsx
+scraper/out/
+prep/
+
+# ---- browser: signed-in Chrome profiles hold Gmail/WhatsApp session cookies ----
+src/browser/profile*/
+src/browser/shots/
+src/browser/node_modules/
+*.log
+
+# ---- Python / tooling ----
+.venv/
+__pycache__/
+*.pyc
+src/w2p.ps1
+~$*
+.env
+.claude/settings.local.json
+
+# ---- Mihir's original per-job Python specs (contact details + every company applied to) ----
+src/content.py
+src/names.py
+src/gen.py
+src/batches/

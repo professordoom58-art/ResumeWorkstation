@@ -1,0 +1,14 @@
+{
+ "name": "FIRST LAST",
+ "title_line": ["Target Role", "Degree", "Key credential"],
+ "contact": {"location": "City, State", "email": "you@example.com", "phone": "+91 90000 00000",
+             "linkedin_text": "linkedin.com/in/you", "linkedin_url": "https://www.linkedin.com/in/you"},
+ "summary": ["<tailor per job: 2–3 lines built from the fact bank, using the JD's own words>"],
+ "experience": [
+  {"company": "EMPLOYER", "location": "City, State", "title": "Exact Title", "dates": "Jan 2024 – Present",
+   "bullets": ["Did X for Y, resulting in Z (number copied exactly from the resume)."]}
+ ],
+ "education": [{"school": "COLLEGE", "location": "City, State", "degree": "Degree – CGPA 0.0", "years": "2020 – 2024"}],
+ "additional": [["Certification", "Name, issuer, date"], ["Languages", "English"]],
+ "file_prefix": "First's Resume"
+}

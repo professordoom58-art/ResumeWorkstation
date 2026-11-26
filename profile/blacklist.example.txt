@@ -1,0 +1,2 @@
+# One company name or email domain per line. Leads matching any line are dropped before scoring.
+# example: catalyst clinical

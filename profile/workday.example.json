@@ -1,0 +1,7 @@
+{
+ "myInfo": {"firstName": "First", "lastName": "Last", "addressLine1": "Street", "city": "City", "postalCode": "000000",
+            "phone": "9000000000", "region": "State", "source": "Job Board"},
+ "work": [{"title": "Exact Title", "company": "Employer", "location": "City, State", "current": true,
+           "fromM": "01", "fromY": "2024", "desc": "Bullets joined as one paragraph."}],
+ "education": [{"school": "College, City", "degree": "Bachelor's", "gpa": "0.0", "from": "2020", "to": "2024"}]
+}

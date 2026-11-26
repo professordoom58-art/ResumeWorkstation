@@ -1,0 +1,15 @@
+{
+  "name": "job-hunt-browser",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright-over-CDP helpers for Gmail, WhatsApp Web and Workday",
+  "type": "commonjs",
+  "scripts": {
+    "chrome": "node start.js",
+    "send:email": "node gmail_send.js",
+    "send:whatsapp": "node wa_batch.js"
+  },
+  "dependencies": {
+    "playwright-core": "^1.65.1"
+  }
+}

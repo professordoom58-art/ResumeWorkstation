@@ -1,0 +1,21 @@
+# Copy to profile/search.yaml. The AI fills this from the attached resume (CLAUDE.md step 2).
+# search_terms: roles built from what the person DID (duties, tools, domains), not only the titles they held.
+# match_keywords: skills/duties/degrees that should appear in a relevant posting's text.
+target: 60
+need_contact: both            # both | email | phone | any
+hours_old: 168
+sites: [indeed, naukri, glassdoor]
+country: India
+phone_country_code: "91"
+results_per_query: 40
+delay_seconds: 3
+search_terms: [example role one, example role two, role built from a duty]
+locations: [New Delhi, Gurugram]
+allow_locations: [delhi, gurugram, gurgaon, '\bncr\b', remote, work from home]
+deny_locations: []
+min_match: 2
+match_keywords: [skill one, tool two, degree three, domain four]
+title_exclude: ['customer (support|service|care)', '\bbpo\b', 'data entry']
+pay_floor_month: 20000
+max_years_asked: 3
+require_any: []

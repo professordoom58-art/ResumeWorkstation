@@ -1,0 +1,14 @@
+# scraper
+python-jobspy
+requests
+beautifulsoup4
+lxml
+pandas
+openpyxl
+dnspython
+email-validator
+pyyaml
+tldextract
+# resume builder (PDF export uses Microsoft Word via COM, Windows only)
+python-docx
+pymupdf
